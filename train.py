@@ -138,7 +138,7 @@ reduce_lr = ReduceLROnPlateau(
 )
 
 model_checkpoint = ModelCheckpoint(
-    'best_model.h5',
+    'best_model.keras',
     monitor='val_loss',
     save_best_only=True
 )
