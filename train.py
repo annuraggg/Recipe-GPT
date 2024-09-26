@@ -1,67 +1,66 @@
-import os
 import tensorflow as tf
 from tensorflow.keras import layers, models
-from tensorflow.keras.preprocessing import image_dataset_from_directory
+from datasets import load_dataset
 from sklearn.model_selection import train_test_split
+import numpy as np
 import matplotlib.pyplot as plt
 
-# Ensure Kaggle credentials are in place
-if not os.path.exists(os.path.expanduser('~/.kaggle/kaggle.json')):
-    raise FileNotFoundError('Kaggle API credentials not found. Please ensure kaggle.json is in ~/.kaggle/')
-
-# Download the Food-101 dataset from Kaggle
-os.system("kaggle datasets download -d dansbecker/food-101 -p ./")
-
-# Unzip the dataset
-os.system("unzip -q ./food-101.zip -d ./")
-
-# Set paths
-DATASET_DIR = './food-101/images/'
+# Constants
 BATCH_SIZE = 32
 IMG_SIZE = (224, 224)
-EPOCHS = 50  # You requested 50 epochs
+EPOCHS = 50  # Number of epochs for training
 
-# Load dataset and split into train and validation sets
-dataset = image_dataset_from_directory(
-    DATASET_DIR, 
-    image_size=IMG_SIZE, 
+# Load the Food101 dataset from Hugging Face
+dataset = load_dataset("food101", split="train[:100%]")
+
+# Function to preprocess images and labels
+def preprocess(example):
+    image = tf.image.resize(tf.image.decode_jpeg(example['image'], channels=3), IMG_SIZE)
+    label = tf.one_hot(example['label'], 101)
+    return image, label
+
+# Prepare the dataset (Apply preprocessing)
+dataset = dataset.map(preprocess, num_proc=4)
+
+# Convert to TensorFlow Dataset
+tf_dataset = dataset.to_tf_dataset(
+    columns=['image'], 
+    label_cols=['label'],
     batch_size=BATCH_SIZE,
-    label_mode='categorical'
+    shuffle=True
 )
 
-# Split dataset into training and validation (80-20 split)
-train_size = int(0.8 * len(dataset))
-val_size = len(dataset) - train_size
-train_dataset = dataset.take(train_size)
-val_dataset = dataset.skip(train_size)
+# Split into train and validation sets (80-20 split)
+train_size = 0.8
+train_dataset, val_dataset = train_test_split(list(tf_dataset), test_size=(1 - train_size))
 
-# Data augmentation to improve model generalization
+# Data augmentation for better generalization
 data_augmentation = models.Sequential([
     layers.RandomFlip("horizontal_and_vertical"),
     layers.RandomRotation(0.2),
 ])
 
-# Preprocess input for MobileNetV2
+# Preprocessing input for MobileNetV2
 preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
 
-# Build the base model from MobileNetV2 pre-trained on ImageNet
+# Load the base model (MobileNetV2 pre-trained on ImageNet)
 base_model = tf.keras.applications.MobileNetV2(
     input_shape=IMG_SIZE + (3,),
     include_top=False,
     weights='imagenet'
 )
 
-# Freeze the base model layers
+# Freeze the base model
 base_model.trainable = False
 
 # Build the model
 model = models.Sequential([
-    data_augmentation,                        # Data augmentation layer
-    preprocess_input,                         # Preprocessing layer
-    base_model,                               # Pre-trained base model
-    layers.GlobalAveragePooling2D(),          # Global pooling
-    layers.Dropout(0.2),                      # Dropout for regularization
-    layers.Dense(101, activation='softmax')   # Output layer for 101 classes
+    data_augmentation,                         # Data augmentation
+    preprocess_input,                          # Preprocess input
+    base_model,                                # Pre-trained base model
+    layers.GlobalAveragePooling2D(),           # Global pooling layer
+    layers.Dropout(0.2),                       # Dropout for regularization
+    layers.Dense(101, activation='softmax')    # Output layer for 101 classes
 ])
 
 # Compile the model
@@ -72,15 +71,15 @@ model.compile(optimizer=tf.keras.optimizers.Adam(),
 # Summary of the model
 model.summary()
 
-# Training the model
+# Train the model
 history = model.fit(
-    train_dataset,
-    validation_data=val_dataset,
+    tf.data.Dataset.from_tensor_slices(train_dataset).batch(BATCH_SIZE),
+    validation_data=tf.data.Dataset.from_tensor_slices(val_dataset).batch(BATCH_SIZE),
     epochs=EPOCHS
 )
 
 # Save the trained model
-model.save('food101_model.h5')
+model.save('food101_model_hf.h5')
 
 # Plot training & validation accuracy and loss
 def plot_history(history):
