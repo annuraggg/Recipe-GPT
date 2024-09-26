@@ -12,7 +12,7 @@ from tqdm import tqdm
 # Define constants
 IMG_HEIGHT, IMG_WIDTH = 224, 224
 BATCH_SIZE = 640
-EPOCHS = 20
+EPOCHS = 6
 NUM_CLASSES = 101  # Using all 101 classes
 
 # Function to download and extract the dataset
