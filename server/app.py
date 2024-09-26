@@ -44,6 +44,10 @@ else:
     recipe_parser.train_from_csv('RAW_recipes.csv')
     recipe_parser.save_model()
 
+@app.route('/health', methods=['POST', 'GET'])
+def health():
+    return jsonify({'status': 'healthy'})
+
 @app.route('/analyze-image', methods=['POST'])
 def analyze_image():
     if 'image' not in request.files:
