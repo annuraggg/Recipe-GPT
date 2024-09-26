@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 # Define constants
 IMG_HEIGHT, IMG_WIDTH = 224, 224
-BATCH_SIZE = 640  # Adjusted batch size
+BATCH_SIZE = 512  # Adjusted batch size
 EPOCHS = 20  # Increased epochs for better training
 NUM_CLASSES = 101  # Using all 101 classes
 
