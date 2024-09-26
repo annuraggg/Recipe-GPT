@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 import os
 import numpy as np
@@ -11,7 +12,7 @@ from tqdm import tqdm
 # Define constants
 IMG_HEIGHT, IMG_WIDTH = 224, 224
 BATCH_SIZE = 640
-EPOCHS = 2
+EPOCHS = 20
 NUM_CLASSES = 101  # Using all 101 classes
 
 # Function to download and extract the dataset
@@ -119,13 +120,21 @@ model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
+# Define early stopping
+early_stopping = EarlyStopping(
+    monitor='val_loss',
+    patience=5,
+    restore_best_weights=True
+)
+
 # Train the model
 history = model.fit(
     train_generator,
     steps_per_epoch=len(train_data) // BATCH_SIZE,
     epochs=EPOCHS,
     validation_data=validation_generator,
-    validation_steps=len(val_data) // BATCH_SIZE
+    validation_steps=len(val_data) // BATCH_SIZE,
+    callbacks=[early_stopping]
 )
 
 # Plot training results
@@ -134,9 +143,9 @@ val_acc = history.history['val_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-epochs_range = range(EPOCHS)
+epochs_range = range(len(acc))
 
-plt.figure(figsize=(8, 8))
+plt.figure(figsize=(12, 4))
 plt.subplot(1, 2, 1)
 plt.plot(epochs_range, acc, label='Training Accuracy')
 plt.plot(epochs_range, val_acc, label='Validation Accuracy')
