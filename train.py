@@ -80,22 +80,26 @@ train_datagen = ImageDataGenerator(
 validation_datagen = ImageDataGenerator(rescale=1./255)
 
 def generate_data(data, batch_size):
+    num_samples = len(data)
     while True:
-        batch = np.random.choice(data, batch_size)
-        batch_images = []
-        batch_labels = []
-        for image_name, label in batch:
-            img = tf.keras.preprocessing.image.load_img(
-                os.path.join(data_dir, image_name), 
-                target_size=(IMG_HEIGHT, IMG_WIDTH)
-            )
-            img = tf.keras.preprocessing.image.img_to_array(img)
-            batch_images.append(img)
-            batch_labels.append(classes.index(label))
-        batch_images = np.array(batch_images) / 255.0
-        batch_labels = tf.keras.utils.to_categorical(batch_labels, num_classes=NUM_CLASSES)
-        yield batch_images, batch_labels
-
+        # Shuffle the data at the start of each epoch
+        np.random.shuffle(data)
+        for offset in range(0, num_samples, batch_size):
+            batch = data[offset:offset+batch_size]
+            batch_images = []
+            batch_labels = []
+            for image_name, label in batch:
+                img = tf.keras.preprocessing.image.load_img(
+                    os.path.join(data_dir, image_name), 
+                    target_size=(IMG_HEIGHT, IMG_WIDTH)
+                )
+                img = tf.keras.preprocessing.image.img_to_array(img)
+                batch_images.append(img)
+                batch_labels.append(classes.index(label))
+            batch_images = np.array(batch_images) / 255.0
+            batch_labels = tf.keras.utils.to_categorical(batch_labels, num_classes=NUM_CLASSES)
+            yield batch_images, batch_labels
+            
 train_generator = generate_data(train_data, BATCH_SIZE)
 validation_generator = generate_data(val_data, BATCH_SIZE)
 
