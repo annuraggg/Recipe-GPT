@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 
-interface Ingredient {
-  name: string;
-  amount: string;
-}
+// interface Ingredient {
+//   name: string;
+//   amount: string;
+// }
 
 interface Recipe {
   name: string;
