@@ -1,0 +1,6 @@
+venv
+food_recognition_model.h5
+RAW_recipes.csv
+class_names.txt
+recipe_model.joblib
+__pycache__/recipe_parser.cpython-310.pyc
