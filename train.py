@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 # Define constants
 IMG_HEIGHT, IMG_WIDTH = 224, 224
-BATCH_SIZE = 512
+BATCH_SIZE = 1024
 EPOCHS = 2
 NUM_CLASSES = 101  # Using all 101 classes
 
