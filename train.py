@@ -1,118 +1,164 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
-from datasets import load_dataset
-from sklearn.model_selection import train_test_split
-import numpy as np
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
+import os
+import numpy as np
+import requests
+import tarfile
+from tqdm import tqdm
 
-# Constants
-BATCH_SIZE = 32
-IMG_SIZE = (224, 224)
-EPOCHS = 50  # Number of epochs for training
+# Define constants
+IMG_HEIGHT, IMG_WIDTH = 224, 224
+BATCH_SIZE = 512
+EPOCHS = 2
+NUM_CLASSES = 101  # We'll use 10 classes for faster training, but you can increase this up to 101
 
-# Load the Food101 dataset from Hugging Face
-dataset = load_dataset("ethz/food101", split="train[:100%]")
-
-# Check the structure of a sample
-print(dataset[0])
-
-# Function to preprocess images and labels
-def preprocess(example):
-    # Convert the image to a NumPy array (if it's not already)
-    image = np.array(example['image'])
-
-    # Resize the image
-    image = tf.image.resize(image, IMG_SIZE)
+# Function to download and extract the dataset
+def download_and_extract_dataset(url, target_dir):
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
     
-    # One-hot encode the label
-    label = tf.one_hot(example['label'], 101)
+    tar_file_path = os.path.join(target_dir, "food-101.tar.gz")
     
-    # Return as a dictionary
-    return {'image': image, 'label': label}
+    if not os.path.exists(tar_file_path):
+        print("Downloading dataset...")
+        response = requests.get(url, stream=True)
+        total_size = int(response.headers.get('content-length', 0))
+        
+        with open(tar_file_path, "wb") as file, tqdm(
+            desc="Downloading",
+            total=total_size,
+            unit="iB",
+            unit_scale=True,
+            unit_divisor=1024,
+        ) as progress_bar:
+            for data in response.iter_content(chunk_size=1024):
+                size = file.write(data)
+                progress_bar.update(size)
+    
+    if not os.path.exists(os.path.join(target_dir, "food-101")):
+        print("Extracting dataset...")
+        with tarfile.open(tar_file_path, "r:gz") as tar:
+            tar.extractall(path=target_dir)
+    
+    print("Dataset ready!")
 
-# Apply preprocessing to the dataset
-dataset = dataset.map(preprocess)
+# Download and extract the dataset
+dataset_url = "http://data.vision.ee.ethz.ch/cvl/food-101.tar.gz"
+dataset_dir = "food-101_dataset"
+download_and_extract_dataset(dataset_url, dataset_dir)
 
-# Convert to TensorFlow Dataset
-tf_dataset = dataset.to_tf_dataset(
-    columns=['image'], 
-    label_cols=['label'],
-    batch_size=BATCH_SIZE,
-    shuffle=True
+# Prepare the data
+data_dir = os.path.join(dataset_dir, "food-101", "images")
+classes = sorted(os.listdir(data_dir))[:NUM_CLASSES]  # Get the first NUM_CLASSES classes
+
+train_data = []
+val_data = []
+
+for class_name in classes:
+    class_dir = os.path.join(data_dir, class_name)
+    images = os.listdir(class_dir)
+    train_images = images[:750]  # First 750 images for training
+    val_images = images[750:750+250]  # Next 250 images for validation
+    
+    train_data.extend([(os.path.join(class_name, img), class_name) for img in train_images])
+    val_data.extend([(os.path.join(class_name, img), class_name) for img in val_images])
+
+# Set up data generators
+train_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True,
+    fill_mode='nearest'
 )
 
-# Split into train and validation sets (80-20 split)
-train_size = 0.8
-train_dataset, val_dataset = train_test_split(list(tf_dataset), test_size=(1 - train_size))
+validation_datagen = ImageDataGenerator(rescale=1./255)
 
-# Data augmentation for better generalization
-data_augmentation = models.Sequential([
-    layers.RandomFlip("horizontal_and_vertical"),
-    layers.RandomRotation(0.2),
-])
+def generate_data(data, batch_size):
+    while True:
+        batch = np.random.choice(data, batch_size)
+        batch_images = []
+        batch_labels = []
+        for image_name, label in batch:
+            img = tf.keras.preprocessing.image.load_img(
+                os.path.join(data_dir, image_name), 
+                target_size=(IMG_HEIGHT, IMG_WIDTH)
+            )
+            img = tf.keras.preprocessing.image.img_to_array(img)
+            batch_images.append(img)
+            batch_labels.append(classes.index(label))
+        batch_images = np.array(batch_images) / 255.0
+        batch_labels = tf.keras.utils.to_categorical(batch_labels, num_classes=NUM_CLASSES)
+        yield batch_images, batch_labels
 
-# Preprocessing input for MobileNetV2
-preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
-
-# Load the base model (MobileNetV2 pre-trained on ImageNet)
-base_model = tf.keras.applications.MobileNetV2(
-    input_shape=IMG_SIZE + (3,),
-    include_top=False,
-    weights='imagenet'
-)
-
-# Freeze the base model
-base_model.trainable = False
+train_generator = generate_data(train_data, BATCH_SIZE)
+validation_generator = generate_data(val_data, BATCH_SIZE)
 
 # Build the model
 model = models.Sequential([
-    data_augmentation,                         # Data augmentation
-    preprocess_input,                          # Preprocess input
-    base_model,                                # Pre-trained base model
-    layers.GlobalAveragePooling2D(),           # Global pooling layer
-    layers.Dropout(0.2),                       # Dropout for regularization
-    layers.Dense(101, activation='softmax')    # Output layer for 101 classes
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(NUM_CLASSES, activation='softmax')
 ])
 
-# Compile the model
-model.compile(optimizer=tf.keras.optimizers.Adam(),
+model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-# Summary of the model
-model.summary()
-
 # Train the model
 history = model.fit(
-    tf.data.Dataset.from_tensor_slices(train_dataset).batch(BATCH_SIZE),
-    validation_data=tf.data.Dataset.from_tensor_slices(val_dataset).batch(BATCH_SIZE),
-    epochs=EPOCHS
+    train_generator,
+    steps_per_epoch=len(train_data) // BATCH_SIZE,
+    epochs=EPOCHS,
+    validation_data=validation_generator,
+    validation_steps=len(val_data) // BATCH_SIZE
 )
 
-# Save the trained model
-model.save('food101_model_hf.h5')
+# Plot training results
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
 
-# Plot training & validation accuracy and loss
-def plot_history(history):
-    acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
+epochs_range = range(EPOCHS)
 
-    plt.figure(figsize=(8, 8))
-    plt.subplot(1, 2, 1)
-    plt.plot(acc, label='Training Accuracy')
-    plt.plot(val_acc, label='Validation Accuracy')
-    plt.legend(loc='lower right')
-    plt.title('Training and Validation Accuracy')
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
 
-    plt.subplot(1, 2, 2)
-    plt.plot(loss, label='Training Loss')
-    plt.plot(val_loss, label='Validation Loss')
-    plt.legend(loc='upper right')
-    plt.title('Training and Validation Loss')
-    plt.savefig('training_validation_accuracy_loss.png')
-    plt.show()
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
 
-# Plot and save the training history
-plot_history(history)
+# Function to predict food category
+def predict_food(image_path):
+    img = tf.keras.preprocessing.image.load_img(
+        image_path, target_size=(IMG_HEIGHT, IMG_WIDTH)
+    )
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = np.expand_dims(img_array, 0) / 255.0  # Create a batch and normalize
+
+    predictions = model.predict(img_array)
+    predicted_class = classes[np.argmax(predictions[0])]
+    confidence = 100 * np.max(predictions[0])
+
+    print(f"This image most likely belongs to {predicted_class} with a {confidence:.2f} percent confidence.")
+
+# Example usage
+# predict_food("path/to/your/food/image.jpg")
