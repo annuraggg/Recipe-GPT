@@ -12,7 +12,7 @@ from tqdm import tqdm
 IMG_HEIGHT, IMG_WIDTH = 224, 224
 BATCH_SIZE = 512
 EPOCHS = 2
-NUM_CLASSES = 101  # We'll use 10 classes for faster training, but you can increase this up to 101
+NUM_CLASSES = 101  # Using all 101 classes
 
 # Function to download and extract the dataset
 def download_and_extract_dataset(url, target_dir):
@@ -99,7 +99,7 @@ def generate_data(data, batch_size):
             batch_images = np.array(batch_images) / 255.0
             batch_labels = tf.keras.utils.to_categorical(batch_labels, num_classes=NUM_CLASSES)
             yield batch_images, batch_labels
-            
+
 train_generator = generate_data(train_data, BATCH_SIZE)
 validation_generator = generate_data(val_data, BATCH_SIZE)
 
@@ -148,21 +148,19 @@ plt.plot(epochs_range, loss, label='Training Loss')
 plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
-plt.show()
+plt.savefig('training_history.png')
+plt.close()
 
-# Function to predict food category
-def predict_food(image_path):
-    img = tf.keras.preprocessing.image.load_img(
-        image_path, target_size=(IMG_HEIGHT, IMG_WIDTH)
-    )
-    img_array = tf.keras.preprocessing.image.img_to_array(img)
-    img_array = np.expand_dims(img_array, 0) / 255.0  # Create a batch and normalize
+# Save the model
+model_save_path = 'food_recognition_model'
+model.save(model_save_path)
+print(f"Model saved to {model_save_path}")
 
-    predictions = model.predict(img_array)
-    predicted_class = classes[np.argmax(predictions[0])]
-    confidence = 100 * np.max(predictions[0])
+# Save the class names
+class_names_file = 'class_names.txt'
+with open(class_names_file, 'w') as f:
+    for class_name in classes:
+        f.write(f"{class_name}\n")
+print(f"Class names saved to {class_names_file}")
 
-    print(f"This image most likely belongs to {predicted_class} with a {confidence:.2f} percent confidence.")
-
-# Example usage
-# predict_food("path/to/your/food/image.jpg")
+print("Training complete. Model and class names have been saved.")
