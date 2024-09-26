@@ -152,7 +152,7 @@ plt.savefig('training_history.png')
 plt.close()
 
 # Save the model
-model_save_path = 'food_recognition_model'
+model_save_path = 'food_recognition_model.h5'
 model.save(model_save_path)
 print(f"Model saved to {model_save_path}")
 
