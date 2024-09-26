@@ -14,7 +14,7 @@ import io
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173", "https://recipe.anuragsawant.in"}})
+CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://recipe.anuragsawant.in"]}})
 
 recipe_parser = RecipeParser()
 
