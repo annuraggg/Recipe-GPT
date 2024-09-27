@@ -39,7 +39,7 @@ const SavedRecipesPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100 p-8">
+    <div className="h-full bg-gradient-to-br from-purple-100 via-white to-indigo-100 p-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
