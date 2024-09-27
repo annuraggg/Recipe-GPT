@@ -56,11 +56,20 @@ class RecipeParser:
                     scaled_ingredients.append(ingredient)
 
             recipe = {
+                'id': str(closest_recipe['id']),
                 'name': closest_recipe['name'],
                 'ingredients': scaled_ingredients,
                 'instructions': instructions,
-                'servings': num_people
+                'servings': num_people,
+                'nutrition': closest_recipe['nutrition'],
+                'minutes': str(closest_recipe['minutes']),
+                'tags': closest_recipe['tags'],
+                'description': closest_recipe['description'],
+                'n_steps': str(closest_recipe['n_steps']),
+                'n_ingredients': str(closest_recipe['n_ingredients'])
             }
+
+            print(recipe)
             
             return recipe
         except Exception as e:

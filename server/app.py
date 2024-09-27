@@ -48,6 +48,58 @@ else:
 def health():
     return jsonify({'status': 'healthy'})
 
+@app.route('/get-recipe-by-id', methods=['POST'])
+def get_recipe_by_id():
+    data = request.get_json()
+    recipe_id = data.get('recipe_id')
+
+    if recipe_id is None:
+        logging.warning("No recipe ID provided in request")
+        return jsonify({'error': 'No recipe ID provided'}), 400
+        
+    recipe = recipe_parser.recipes_df[recipe_parser.recipes_df['id'] == int(recipe_id)].iloc[0]
+    
+    if recipe is None:
+        logging.warning(f"Could not find recipe with ID {recipe_id}")
+        return jsonify({'error': f'Could not find recipe with ID {recipe_id}'}), 400
+    
+    ingredients = eval(recipe['ingredients'])
+    instructions = eval(recipe['steps'])
+    
+    recipe = {
+        'id': str(recipe['id']),
+        'name': recipe['name'],
+        'ingredients': ingredients,
+        'instructions': instructions,
+        'servings': 4,
+        'nutrition': recipe['nutrition'],
+        'minutes': str(recipe['minutes']),
+        'tags': recipe['tags'],
+        'description': recipe['description'],
+        'n_steps': str(recipe['n_steps']),
+        'n_ingredients': str(recipe['n_ingredients'])
+    }
+    
+    return jsonify(recipe)
+
+@app.route('/parse-recipe', methods=['POST'])
+def parse_recipe():
+    data = request.get_json()
+    dish_name = data.get('dish_name')
+
+    if dish_name is None:
+        logging.warning("No dish name provided in request")
+        return jsonify({'error': 'No dish name provided'}), 400
+        
+    recipe = recipe_parser.predict(dish_name, 1)
+    
+    if recipe is None:
+        logging.warning(f"Could not generate recipe for {dish_name}")
+        return jsonify({'error': f'Could not generate recipe for {dish_name}'}), 400
+    
+    return jsonify(recipe)
+
+    
 @app.route('/analyze-image', methods=['POST'])
 def analyze_image():
     if 'image' not in request.files:
