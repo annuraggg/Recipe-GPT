@@ -38,7 +38,7 @@ const SavedRecipesPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-800 p-8">
+    <div className="h-full bg-gray-800 p-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
