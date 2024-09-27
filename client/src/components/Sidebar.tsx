@@ -58,7 +58,7 @@ const Sidebar = () => {
 
       <div className="mt-auto w-full">
         <motion.a
-          href="https://github.com"
+          href="https://github.com/annuraggg/Recipe-GPT"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 text-sm bg-white bg-opacity-10 p-3 rounded-lg hover:bg-opacity-20 transition-all duration-200"
