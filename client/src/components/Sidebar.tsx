@@ -24,33 +24,31 @@ const Sidebar = () => {
 
   return (
     <motion.div
-      initial={{ x: -300 }}
+      initial={{ x: -250 }}
       animate={{ x: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-gradient-to-b from-purple-700 to-indigo-900 min-w-[20%] h-screen flex flex-col items-center px-4 py-8 text-white shadow-lg"
+      transition={{ duration: 0.3 }}
+      className="bg-gray-900 min-w-[20%] h-screen flex flex-col items-start px-6 py-4 text-gray-200 shadow-lg"
     >
-      <h2 className="text-2xl font-bold mb-8 text-center">
-        Recipe Ingredient Parser
-      </h2>
+      <h2 className="text-2xl font-semibold mb-6">Recipe Parser</h2>
 
       <nav className="flex flex-col gap-4 w-full">
         {navItems.map((item, index) => (
           <motion.a
             key={index}
             href={item.href}
-            className={`flex items-center gap-3 text-lg p-3 rounded-lg transition-all duration-200 ${
+            className={`flex items-center gap-3 text-lg p-2 rounded-md transition-colors duration-200 ${
               activeItem === item.href
-                ? "bg-white bg-opacity-20 shadow-md"
-                : "hover:bg-white hover:bg-opacity-10"
+                ? "bg-gray-700"
+                : "hover:bg-gray-800"
             }`}
-            onClick={() => setActiveItem(item.name)}
+            onClick={() => setActiveItem(item.href)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             {item.icon}
-            <span>{item.name}</span>
-            {activeItem === item.name && (
-              <ChevronRight className="ml-auto" size={20} />
+            <span className="font-medium">{item.name}</span>
+            {activeItem === item.href && (
+              <ChevronRight className="ml-auto" size={16} />
             )}
           </motion.a>
         ))}
@@ -58,15 +56,15 @@ const Sidebar = () => {
 
       <div className="mt-auto w-full">
         <motion.a
-          href="https://github.com"
+          href="https://github.com/annuraggg/Recipe-GPT"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 text-sm bg-white bg-opacity-10 p-3 rounded-lg hover:bg-opacity-20 transition-all duration-200"
+          className="flex items-center justify-center gap-2 text-sm bg-gray-800 p-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <Github size={20} />
-          <span>View on GitHub</span>
+          <Github size={18} />
+          <span>GitHub</span>
         </motion.a>
       </div>
     </motion.div>

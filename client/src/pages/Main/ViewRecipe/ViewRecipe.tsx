@@ -146,27 +146,27 @@ const ViewRecipe = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center w-full">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900" />
+      <div className="min-h-screen flex items-center justify-center w-full bg-gray-900">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-700" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <p className="text-red-500 font-semibold">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-emerald-50 w-full">
+    <div className="min-h-screen bg-gray-900 w-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto bg-white shadow-2xl overflow-hidden w-full"
+        className="mx-auto bg-gray-800 shadow-2xl overflow-hidden w-full"
       >
         <div className="relative h-96">
           <img
@@ -201,7 +201,7 @@ const ViewRecipe = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-gray-200 text-gray-700 px-3 py-2 rounded-lg"
+                className="bg-gray-700 text-gray-300 px-3 py-2 rounded-lg"
                 onClick={shareLink}
               >
                 <Share2 size={18} />
@@ -209,7 +209,7 @@ const ViewRecipe = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-gray-200 text-gray-700 px-3 py-2 rounded-lg"
+                className="bg-gray-700 text-gray-300 px-3 py-2 rounded-lg"
                 onClick={printRecipe}
               >
                 <Printer size={18} />
@@ -218,35 +218,42 @@ const ViewRecipe = () => {
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Ingredients</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-white">
+              Ingredients
+            </h2>
             <ul className="grid grid-cols-2 gap-4">
               {recipe?.ingredients?.map((ingredient, index) => (
-                <li key={index} className="flex items-start">
+                <li
+                  key={index}
+                  className="flex items-start bg-gray-800 p-2 rounded-lg"
+                >
                   <Check
                     size={20}
                     className="text-emerald-500 mr-2 flex-shrink-0 mt-1"
                   />
-                  <span>{ingredient}</span>
+                  <span className="text-white">{ingredient}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Instructions</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-white">
+              Instructions
+            </h2>
             {recipe?.instructions?.map((step, index) => (
               <motion.div
                 key={index}
                 initial={false}
                 animate={{
                   backgroundColor:
-                    activeStep === index ? "rgb(243 244 246)" : "transparent",
+                    activeStep === index ? "rgb(30 41 59)" : "transparent",
                 }}
                 className="mb-4 rounded-lg overflow-hidden"
               >
                 <button
                   onClick={() => toggleStep(index)}
-                  className="flex justify-between items-center w-full p-4 text-left"
+                  className="flex justify-between items-center w-full p-4 text-left text-white"
                 >
                   <span className="font-medium">Step {index + 1}</span>
                   {activeStep === index ? (
@@ -263,7 +270,7 @@ const ViewRecipe = () => {
                     collapsed: { opacity: 0, height: 0 },
                   }}
                   transition={{ duration: 0.3 }}
-                  className="px-4 pb-4"
+                  className="px-4 pb-4 text-white"
                 >
                   <p>{step}</p>
                 </motion.div>
@@ -274,9 +281,9 @@ const ViewRecipe = () => {
           <div className="mb-8">
             <button
               onClick={() => setShowNutrition(!showNutrition)}
-              className="flex justify-between items-center w-full p-4 bg-gray-100 rounded-lg"
+              className="flex justify-between items-center w-full p-4 bg-gray-700 rounded-lg"
             >
-              <span className="font-semibold">
+              <span className="font-semibold text-white">
                 Nutrition Information (Per Serving)
               </span>
               {showNutrition ? (
@@ -297,33 +304,49 @@ const ViewRecipe = () => {
             >
               {recipe?.nutrition && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-amber-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Calories</h3>
-                    <p>{JSON.parse(recipe.nutrition)[0]} kcal</p>
+                  <div className="bg-amber-600 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">Calories</h3>
+                    <p className="text-white">
+                      {JSON.parse(recipe.nutrition)[0]} kcal
+                    </p>
                   </div>
-                  <div className="bg-emerald-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Fat</h3>
-                    <p>{JSON.parse(recipe.nutrition)[1]} g</p>
+                  <div className="bg-emerald-600 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">Fat</h3>
+                    <p className="text-white">
+                      {JSON.parse(recipe.nutrition)[1]} g
+                    </p>
                   </div>
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Carbohydrates</h3>
-                    <p>{JSON.parse(recipe.nutrition)[2]} g</p>
+                  <div className="bg-blue-600 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">
+                      Carbohydrates
+                    </h3>
+                    <p className="text-white">
+                      {JSON.parse(recipe.nutrition)[2]} g
+                    </p>
                   </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Fiber</h3>
-                    <p>{JSON.parse(recipe.nutrition)[3]} g</p>
+                  <div className="bg-purple-600 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">Fiber</h3>
+                    <p className="text-white">
+                      {JSON.parse(recipe.nutrition)[3]} g
+                    </p>
                   </div>
-                  <div className="bg-amber-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Protein</h3>
-                    <p>{JSON.parse(recipe.nutrition)[4]} g</p>
+                  <div className="bg-amber-600 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">Protein</h3>
+                    <p className="text-white">
+                      {JSON.parse(recipe.nutrition)[4]} g
+                    </p>
                   </div>
-                  <div className="bg-amber-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Sugar</h3>
-                    <p>{JSON.parse(recipe.nutrition)[5]} g</p>
-                  </div>{" "}
-                  <div className="bg-amber-50 p-4 rounded-lg">
-                    <h3 className="font-semibold mb-2">Sodium</h3>
-                    <p>{JSON.parse(recipe.nutrition)[6]} mg</p>
+                  <div className="bg-amber-600 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">Sugar</h3>
+                    <p className="text-white">
+                      {JSON.parse(recipe.nutrition)[5]} g
+                    </p>
+                  </div>
+                  <div className="bg-amber-600 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 text-white">Sodium</h3>
+                    <p className="text-white">
+                      {JSON.parse(recipe.nutrition)[6]} mg
+                    </p>
                   </div>
                 </div>
               )}

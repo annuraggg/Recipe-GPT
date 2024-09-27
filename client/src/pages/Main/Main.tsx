@@ -112,7 +112,6 @@ const RecipeParser: React.FC = () => {
 
   const saveRecipe = () => {
     if (recipe) {
-        console.log(recipe);
       const savedRecipes = JSON.parse(
         localStorage.getItem("savedRecipes") || "[]"
       );
@@ -133,15 +132,15 @@ const RecipeParser: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-4 sm:p-8 w-full">
+    <div className="min-h-screen bg-gray-900 p-4 sm:p-8 w-full">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden"
+        className="max-w-4xl mx-auto bg-gray-800 rounded-3xl shadow-2xl overflow-hidden"
       >
         <div className="flex flex-col md:flex-row">
           <div className="w-full md:w-1/2 p-6 sm:p-8">
-            <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-gray-800">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-white">
               Recipe Parser
             </h1>
             <div className="relative mb-6">
@@ -150,7 +149,7 @@ const RecipeParser: React.FC = () => {
                 value={dishName}
                 onChange={(e) => setDishName(e.target.value)}
                 placeholder="Enter dish name"
-                className="w-full py-3 px-4 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full py-3 px-4 bg-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <Search
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -162,14 +161,14 @@ const RecipeParser: React.FC = () => {
               <button
                 onClick={handleParseRecipe}
                 disabled={isLoading}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Parse Recipe
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
-                className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Upload size={20} className="inline mr-2" />
                 Upload Image
@@ -180,7 +179,7 @@ const RecipeParser: React.FC = () => {
               <button
                 onClick={saveRecipe}
                 disabled={isLoading}
-                className="flex-1 w-full mt-3 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 w-full mt-3 bg-green-600 hover:bg-green-500 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={20} className="inline mr-2" />
                 Save Recipe
@@ -195,7 +194,7 @@ const RecipeParser: React.FC = () => {
               className="hidden"
             />
           </div>
-          <div className="w-full md:w-1/2 bg-gray-100 p-6 sm:p-8">
+          <div className="w-full md:w-1/2 bg-gray-800 p-6 sm:p-8">
             {selectedImage ? (
               <div className="relative">
                 <img
@@ -205,14 +204,14 @@ const RecipeParser: React.FC = () => {
                 />
                 <button
                   onClick={() => setSelectedImage(null)}
-                  className="absolute top-2 right-2 bg-white rounded-full p-1 hover:bg-gray-200 transition duration-300"
+                  className="absolute top-2 right-2 bg-gray-700 rounded-full p-1 hover:bg-gray-600 transition duration-300"
                 >
-                  <X size={20} className="text-gray-600" />
+                  <X size={20} className="text-gray-400" />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-64 bg-gray-200 rounded-lg">
-                <p className="text-gray-500">No image uploaded</p>
+              <div className="flex items-center justify-center h-64 bg-gray-600 rounded-lg">
+                <p className="text-gray-300">No image uploaded</p>
               </div>
             )}
           </div>
@@ -235,7 +234,7 @@ const RecipeParser: React.FC = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="bg-red-100 text-red-800 p-4 m-6 sm:m-8 rounded-lg flex items-center"
+              className="bg-red-600 text-white p-4 m-6 sm:m-8 rounded-lg flex items-center"
             >
               <AlertCircle size={20} className="mr-2" />
               {error}
@@ -249,16 +248,16 @@ const RecipeParser: React.FC = () => {
               exit={{ opacity: 0, y: 20 }}
               className="p-6 sm:p-8"
             >
-              <h3 className="text-2xl font-semibold mb-4 text-gray-800">
+              <h3 className="text-2xl font-semibold mb-4 text-white">
                 Image Predictions
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {imagePredictions.map((pred, index) => (
-                  <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                    <p className="font-medium text-gray-800">
+                  <div key={index} className="bg-gray-700 p-4 rounded-lg">
+                    <p className="font-medium text-white">
                       {pred.class.charAt(0).toUpperCase() + pred.class.slice(1)}
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-300">
                       {(pred.probability * 100).toFixed(2)}%
                     </p>
                   </div>
@@ -274,12 +273,12 @@ const RecipeParser: React.FC = () => {
               exit={{ opacity: 0, y: 20 }}
               className="p-6 sm:p-8"
             >
-              <h2 className="text-3xl font-bold mb-4 text-gray-800">
+              <h2 className="text-3xl font-bold mb-4 text-white">
                 {recipe.name.charAt(0).toUpperCase() + recipe.name.slice(1)}
               </h2>
 
               <div className="mb-8">
-                <h3 className="text-2xl font-semibold mb-4 text-gray-800">
+                <h3 className="text-2xl font-semibold mb-4 text-white">
                   Ingredients
                 </h3>
                 <ul className="list-disc list-inside space-y-2">
@@ -287,11 +286,10 @@ const RecipeParser: React.FC = () => {
                     <li key={index} className="flex items-center">
                       <ChevronRight
                         size={20}
-                        className="text-blue-500 mr-2 flex-shrink-0"
+                        className="text-indigo-400 mr-2 flex-shrink-0"
                       />
-                      <span>
-                        {ingredient.charAt(0).toUpperCase() +
-                          ingredient.slice(1)}
+                      <span className="text-white">
+                        {ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}
                       </span>
                     </li>
                   ))}
@@ -299,16 +297,16 @@ const RecipeParser: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-2xl font-semibold mb-4 text-gray-800">
+                <h3 className="text-2xl font-semibold mb-4 text-white">
                   Instructions
                 </h3>
                 <ol className="list-decimal list-inside space-y-4">
                   {recipe.instructions.map((step, index) => (
                     <li key={index} className="flex">
-                      <span className="font-bold text-blue-500 mr-3 flex-shrink-0">
+                      <span className="font-bold text-indigo-400 mr-3 flex-shrink-0">
                         {index + 1}.
                       </span>
-                      <span>
+                      <span className="text-white">
                         {step.charAt(0).toUpperCase() + step.slice(1)}
                       </span>
                     </li>
