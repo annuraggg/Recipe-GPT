@@ -9,7 +9,7 @@ import requests
 import tarfile
 from tqdm import tqdm
 
-# Define constants
+# constants
 IMG_HEIGHT, IMG_WIDTH = 224, 224
 BATCH_SIZE = 512  # Adjusted batch size
 EPOCHS = 20  # Increased epochs for better training
@@ -104,7 +104,7 @@ def generate_data(data, batch_size):
 train_generator = generate_data(train_data, BATCH_SIZE)
 validation_generator = generate_data(val_data, BATCH_SIZE)
 
-# Build the model using transfer learning
+# transfer learning
 base_model = tf.keras.applications.MobileNetV2(
     input_shape=(IMG_HEIGHT, IMG_WIDTH, 3),
     include_top=False,
@@ -118,7 +118,7 @@ model = models.Sequential([
     layers.Dense(NUM_CLASSES, activation='softmax')
 ])
 
-# Compile the model
+# Compile
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
@@ -143,7 +143,7 @@ model_checkpoint = ModelCheckpoint(
     save_best_only=True
 )
 
-# Train the model
+# Train
 history = model.fit(
     train_generator,
     steps_per_epoch=len(train_data) // BATCH_SIZE,
